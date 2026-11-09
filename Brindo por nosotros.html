@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brindo por nosotros</title>
+<style>
+  :root{--bg:#000;--fg:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  html{background:var(--bg);scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,"Times New Roman",serif}
+  body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;
+    background:repeating-linear-gradient(rgba(255,255,255,.035) 0 1px,transparent 1px 3px)}
+  main{width:52vw;margin-left:6vw;padding:16vh 0 55vh;position:relative;z-index:2}
+  p{font-size:clamp(20px,2.2vw,32px);line-height:1.65;margin:0 0 3.2rem;opacity:0;transform:translateY(24px);
+    transition:opacity .9s,transform .9s;text-shadow:0 0 10px rgba(255,255,255,.35)}
+  p.in{opacity:1;transform:none}
+  p.t{font-size:clamp(30px,4.2vw,60px);margin-bottom:4rem}
+  p.flick{animation:fl .7s steps(1)}
+  @keyframes fl{0%{text-shadow:3px 0 #f0f,-3px 0 #0ff;transform:translateX(-6px)}
+    25%{text-shadow:-4px 0 #f0f,4px 0 #0ff;transform:translateX(5px);opacity:.5}
+    50%{text-shadow:2px 0 #f0f,-2px 0 #0ff;transform:translateX(-2px)}
+    100%{text-shadow:0 0 10px rgba(255,255,255,.35)}}
+  .g{display:inline-block;animation:gl 3s infinite steps(1)}
+  @keyframes gl{0%,88%{text-shadow:0 0 10px rgba(255,255,255,.35);transform:none}
+    90%{text-shadow:3px 0 #f0f,-3px 0 #0ff;transform:translate(-2px,1px)}
+    94%{text-shadow:-3px 0 #f0f,3px 0 #0ff;transform:translate(2px,-1px) skewX(-8deg)}
+    97%{text-shadow:2px 0 #0ff,-2px 0 #f0f;transform:none}}
+  canvas{position:fixed;right:6vw;top:50%;transform:translateY(-50%);height:72vh;aspect-ratio:96/128;z-index:1;
+    image-rendering:pixelated;filter:drop-shadow(0 0 14px rgba(160,220,255,.55))}
+  @media (max-aspect-ratio:1/1){
+    main{width:86vw;margin-left:7vw}
+    canvas{opacity:.22;height:60vh;right:50%;transform:translate(50%,-50%)}
+  }
+</style>
+</head>
+<body>
+<canvas id="cv" width="96" height="128"></canvas>
+<main id="poem"></main>
+<script>
+const STANZAS = [
+`Brindo por nosotros.`,
+`Por los que nacimos con el zumbido del módem como canción de cuna,
+y aprendimos a caminar entre cables e iconos de carga.`,
+`Por los que escribieron su primer “hola” en un chat pixelado,
+y guardaron sus secretos en diarios con contraseña.`,
+`Por los que vieron amanecer tras una pantalla,
+con los ojos secos y el corazón acelerado por una respuesta que nunca llegó.`,
+`Brindo por el archivo roto.
+Por los álbumes de fotos atrapados en discos duros muertos,
+por los mensajes borrados que aún duelen como fantasmas en la RAM,
+por los blogs abandonados que son tumbas de versiones nuestras
+que ya no reconocemos, pero que nos construyeron.`,
+`Brindo por el glitch.
+Por la belleza inesperada de la imagen corrupta,
+por el rostro partido en píxeles que revela más que el filtro perfecto,
+por la identidad que se desliza entre avatares,
+negándose a ser un solo perfil, un solo algoritmo.`,
+`Somos los traductores forzosos,
+los que habitamos el espacio entre el clic y el corazón,
+los que amamos a través de latencia,
+los que lloramos frente a una notificación que nunca fue.`,
+`Sabemos que la nube no es etérea:
+es concreto, metal, sudor en un servidor en un país lejano.
+Nuestros recuerdos alquilados a un precio que aún no calculamos.`,
+`Y aun así, brindo.
+Porque en la estática aprendimos a escuchar otras voces,
+en la distorsión encontramos arte,
+en la precariedad de lo digital supimos que lo único permanente
+es el deseo de conectar, de dejar una marca, de decir:
+“Estuve aquí. Fui real, incluso aquí.”`,
+`Brindo por la revolución silenciosa de deformar lo real.
+Por tomar las herramientas que nos dieron para consumir
+y usarlas para crear, para distorsionar, para gritar.`,
+`Porque aunque el código se corrompa y las plataformas caigan,
+algo queda:
+el hábito de buscar humanidad en el ruido,
+la terquedad de construir significado en lo efímero,
+la fe extraña de que al otro lado del cable,
+alguien también estaba brillando en la oscuridad digital,
+intentando no desaparecer.`,
+`Brindo por esa luz. Por nuestra luz.
+Fragmentaria, corrupta, gloriosamente glitch.`
+];
+
+// ---- Texto ----
+const main = document.getElementById('poem'), re = /(Brindo|brindo|glitch|corrupta|corrompa|píxeles|pixelado|ruido|distorsión)/g;
+STANZAS.forEach((s, i) => {
+  const p = document.createElement('p'); if (i === 0) p.className = 't';
+  p.innerHTML = s.split('\n').map(l => l.replace(re, m => `<span class="g" style="animation-delay:-${(Math.random() * 3).toFixed(1)}s">${m}</span>`)).join('<br>');
+  main.appendChild(p);
+});
+const ps = [...main.children];
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting && !e.target.classList.contains('in')) {
+      e.target.classList.add('in', 'flick'); setTimeout(() => e.target.classList.remove('flick'), 750); io.unobserve(e.target);
+    }
+  }), { threshold: .05 });
+  ps.forEach(p => io.observe(p));
+} else ps.forEach(p => p.classList.add('in'));
+
+// ---- Brindis en píxeles con glitch ----
+const BW = 96, BH = 128, cv = document.getElementById('cv'), cx = cv.getContext('2d');
+const mk = () => { const c = document.createElement('canvas'); c.width = BW; c.height = BH; return c; };
+const base = mk(), comp = mk(), layers = [mk(), mk(), mk()], cols = ['#f00', '#0f0', '#00f'];
+const bx = base.getContext('2d'), px = comp.getContext('2d');
+const parts = Array.from({ length: 16 }, () => ({ x: Math.random() * BW, y: Math.random() * BH, s: .6 + Math.random() * 1.6 }));
+
+function glass(ctx, x, y, a, t, seed) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(-8, -2, 16, 2); ctx.fillRect(-1, -22, 2, 20);
+  for (let r = 0; r <= 14; r++) {
+    const hw = Math.round(3 + 11 * Math.sin((r + 1) / 15 * Math.PI / 2)), yy = -23 - r;
+    ctx.globalAlpha = 1;
+    if (r === 0 || r === 14) ctx.fillRect(-hw, yy, hw * 2, 1);
+    else { ctx.fillRect(-hw, yy, 1, 1); ctx.fillRect(hw - 1, yy, 1, 1); }
+    if (r > 0 && r < 10) { ctx.globalAlpha = .45; ctx.fillRect(-hw + 1, yy, hw * 2 - 2, 1); }
+  }
+  ctx.globalAlpha = 1;
+  for (let i = 0; i < 6; i++) ctx.fillRect(i * 3 - 7, -24 - ((t * 9 + i * 5 + seed) % 11), 1, 1);
+  ctx.restore();
+}
+function scene(t) {
+  bx.clearRect(0, 0, BW, BH);
+  glass(bx, 29, 114, .4, t, 0); glass(bx, 67, 114, -.4, t, 3);
+  bx.fillStyle = '#fff';
+  const sx = 48, sy = 70;
+  for (let k = 0; k < 6; k++) {
+    const ph = (t * 2.2 + k * 1.7) % 6, on = ph < 1.4 ? Math.sin(ph / 1.4 * Math.PI) : 0, a = k * 1.05 + t * .3, r = 4 + k * 3 + ph * 2;
+    const x = Math.round(sx + Math.cos(a) * r), y = Math.round(sy + Math.sin(a) * r * .8), s = on > .5 ? 2 : 1;
+    if (on > .1) { bx.fillRect(x - s, y, 2 * s + 1, 1); bx.fillRect(x, y - s, 1, 2 * s + 1); }
+  }
+  parts.forEach(q => { q.y -= q.s * .25; if (q.y < 0) { q.y = BH; q.x = Math.random() * BW; } bx.globalAlpha = .5; bx.fillRect(q.x | 0, q.y | 0, 1, 1); });
+  bx.globalAlpha = 1;
+}
+
+let nextBurst = 1, burstUntil = 0;
+function frame(ms) {
+  const t = ms / 1000, h = document.documentElement, p = clamp01(scrollY / Math.max(1, h.scrollHeight - innerHeight));
+  let k = .1 + p * .55;
+  if (t > nextBurst) { burstUntil = t + .15 + Math.random() * .25; nextBurst = t + (1.1 + Math.random() * 2.4) * (1 - p * .7); }
+  if (t < burstUntil) k = Math.max(k, .7 + Math.random() * .3);
+  if (p > .97) k = Math.max(k, .85);
+  scene(t);
+  const dx = Math.round(k * 4);
+  px.clearRect(0, 0, BW, BH); px.globalCompositeOperation = 'lighter';
+  layers.forEach((L, i) => {
+    const c = L.getContext('2d'); c.globalCompositeOperation = 'copy'; c.drawImage(base, 0, 0);
+    c.globalCompositeOperation = 'source-in'; c.fillStyle = cols[i]; c.fillRect(0, 0, BW, BH);
+    px.drawImage(L, (i - 1) * dx, 0);
+  });
+  cx.clearRect(0, 0, BW, BH); cx.drawImage(comp, 0, 0);
+  const n = Math.floor(k * 6 * Math.random());
+  for (let i = 0; i < n; i++) {
+    const sy = Math.random() * BH | 0, sh = 2 + Math.random() * 10 | 0, off = (Math.random() - .5) * k * 36;
+    cx.clearRect(0, sy, BW, sh); cx.drawImage(comp, 0, sy, BW, sh, off, sy, BW, sh);
+  }
+  if (Math.random() < k * .4) {
+    cx.fillStyle = Math.random() < .5 ? 'rgba(0,255,255,.6)' : 'rgba(255,0,255,.6)';
+    cx.fillRect(Math.random() * BW | 0, Math.random() * BH | 0, 3 + Math.random() * 10 | 0, 1 + Math.random() * 3 | 0);
+  }
+  requestAnimationFrame(frame);
+}
+function clamp01(v) { return Math.min(1, Math.max(0, v)); }
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
